@@ -3,23 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>GPT-4 Flask App</title>
+    <!-- jQuery library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        #userQuestion {
+            height: 80px; /* Adjust the height as needed */
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 8px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        #conversation {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .user {
+            background-color: #e6e6e6;
+            margin-bottom: 5px;
+        }
+
+        .assistant {
+            background-color: #f2f2f2;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>GPT-4 Flask App</h1>
+
     <div>
         <label for="role">Role:</label>
         <input type="text" id="role" value="{{ role }}">
+        
         <label for="temperature">Temperature:</label>
         <input type="range" id="temperature" min="0" max="1" step="0.01" value="{{ temperature }}">
         <span id="temperature_value">{{ temperature }}</span>
     </div>
+
     <div>
-        <label for="question">Your question:</label>
-        <input type="text" id="question">
+        <label for="userQuestion">Your question:</label>
+        <input type="text" id="userQuestion">
         <button onclick="askQuestion()">Ask</button>
         <button onclick="clearHistory()">Clear</button>
     </div>
+
     <div id="conversation">
         {% for entry in history %}
             <div class="{{ entry.role }}">{{ entry.content }}</div>
@@ -27,27 +82,34 @@
     </div>
 
     <script>
+        // Update temperature value display
         function updateTemperatureValue() {
             $('#temperature_value').text($('#temperature').val());
         }
 
+        // Attach event handler for temperature input
         $('#temperature').on('input', updateTemperatureValue);
 
+        // Function to handle asking a question
         function askQuestion() {
             $.post('/ask', {
-                question: $('#question').val(),
+                question: $('#userQuestion').val(),
                 role: $('#role').val(),
                 temperature: $('#temperature').val()
             }, function(data) {
+                // Append user and assistant messages to the conversation
                 $('#conversation').append('<div class="user">' + data.question + '</div>');
                 $('#conversation').append('<div class="assistant">' + data.response + '</div>');
-                $('#question').val('');
+                // Clear user input
+                $('#userQuestion').val('');
             });
         }
 
+        // Function to handle clearing conversation history
         function clearHistory() {
             $.post('/clear', {}, function(data) {
                 if (data.success) {
+                    // Clear the conversation div
                     $('#conversation').empty();
                 }
             });
