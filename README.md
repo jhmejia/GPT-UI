@@ -21,4 +21,4 @@ Then navigate to http://localhost:5000/ in your browser.
 
 ## Screenshots
 
-![Image](image.png)
+![Screenshot of app](image.png)
