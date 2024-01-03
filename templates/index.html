@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GPT-4 Flask App</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>GPT-4 Flask App</h1>
+    <div>
+        <label for="role">Role:</label>
+        <input type="text" id="role" value="{{ role }}">
+        <label for="temperature">Temperature:</label>
+        <input type="range" id="temperature" min="0" max="1" step="0.01" value="{{ temperature }}">
+        <span id="temperature_value">{{ temperature }}</span>
+    </div>
+    <div>
+        <label for="question">Your question:</label>
+        <input type="text" id="question">
+        <button onclick="askQuestion()">Ask</button>
+        <button onclick="clearHistory()">Clear</button>
+    </div>
+    <div id="conversation">
+        {% for entry in history %}
+            <div class="{{ entry.role }}">{{ entry.content }}</div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function updateTemperatureValue() {
+            $('#temperature_value').text($('#temperature').val());
+        }
+
+        $('#temperature').on('input', updateTemperatureValue);
+
+        function askQuestion() {
+            $.post('/ask', {
+                question: $('#question').val(),
+                role: $('#role').val(),
+                temperature: $('#temperature').val()
+            }, function(data) {
+                $('#conversation').append('<div class="user">' + data.question + '</div>');
+                $('#conversation').append('<div class="assistant">' + data.response + '</div>');
+                $('#question').val('');
+            });
+        }
+
+        function clearHistory() {
+            $.post('/clear', {}, function(data) {
+                if (data.success) {
+                    $('#conversation').empty();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
